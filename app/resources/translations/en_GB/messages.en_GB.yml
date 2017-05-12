@@ -11,7 +11,7 @@
 #   3 Legacy untranslated messages
 #   0 Untranslated messages
 #  38 Legacy translation messages
-# 570 Translation messages
+# 572 Translation messages
 
 #--- Unused messages ----------------------------------------------------------
 
@@ -237,6 +237,7 @@ general.phrase.database-check: "Check Database"
 general.phrase.database-check-update: "Database check / update"
 general.phrase.database-prefill: "Pre-fill database"
 general.phrase.database-prefill-dummy-content: "Fill the database with Dummy Content"
+general.phrase.database-types-updated: "Database record field types updated to latest structure"
 general.phrase.database-up-to-date-already: "Your database is already up to date."
 general.phrase.database-update-required-post: "to do this now."
 general.phrase.database-update-required-pre: "The database needs to be updated/repaired. Go to 'Configuration'"
@@ -285,6 +286,7 @@ general.phrase.folders: "Folders"
 general.phrase.full-list-ellipsis: "Full list …"
 general.phrase.general.phrase.uploaded-files: "Uploaded files"
 general.phrase.global-permissions: "Global Permissions"
+general.phrase.hide-proposed-alterations: "Hide proposed alterations"
 general.phrase.hints-colon: "Hints:"
 general.phrase.id: "Id"
 general.phrase.image: "Image"
@@ -414,6 +416,7 @@ general.phrase.toggle-all: "Check/Uncheck all"
 general.phrase.translations: "Translations"
 general.phrase.types: "Types"
 general.phrase.update-database: "Update the database"
+general.phrase.upgrade-database: "Upgrade database types"
 general.phrase.upload: "Upload"
 general.phrase.upload-drop-here: "Drop files in the file manager to upload them or use the button below."
 general.phrase.upload-file: "Upload file"
@@ -481,6 +484,8 @@ page.ckeditor-browse-server.files: "Files"
 page.ckeditor-browse-server.modified: "Modified"
 page.ckeditor-browse-server.size: "Filesize"
 page.ckeditor-browse-server.title: "Files"
+
+page.dbcheck.actions: "Advanced actions"
 
 page.dashboard.button.add: "Add …"
 page.dashboard.empty-database: "It seems there's no content in the database."

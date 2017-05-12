@@ -2,7 +2,16 @@
 
 namespace Bolt\Controller\Backend;
 
+use Bolt\Form\FormType\DatabaseCheckType;
+use Bolt\Logger\BufferingLogger;
+use Bolt\Response\TemplateResponse;
+use Bolt\Response\TemplateView;
+use Bolt\Storage\Migration\Processor\SchemaProcessor;
+use Bolt\Storage\Migration\Processor\TableRecordsProcessor;
+use Bolt\Translation\Translator as Trans;
 use Silex\ControllerCollection;
+use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -17,7 +26,7 @@ class Database extends BackendBase
 {
     protected function addRoutes(ControllerCollection $c)
     {
-        $c->get('/dbcheck', 'check')
+        $c->match('/dbcheck', 'check')
             ->bind('dbcheck');
 
         $c->post('/dbupdate', 'update')
@@ -34,20 +43,64 @@ class Database extends BackendBase
      *
      * @param Request $request
      *
-     * @return \Bolt\Response\TemplateResponse
+     * @return TemplateResponse|TemplateView|RedirectResponse
      */
     public function check(Request $request)
     {
-        /** @var $response \Bolt\Storage\Database\Schema\SchemaCheck */
-        $check = $this->app['schema']->check();
+        $output = null;
+        $changes = null;
+        $typeUpgrades = null;
+        /** @var Form $form */
+        $form = $this->createFormBuilder(DatabaseCheckType::class)
+            ->getForm()
+            ->handleRequest($request)
+        ;
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $button = $form->getClickedButton();
+            if ($button->getName() === 'update') {
+                // Clear out the 'errors' as they will contain "database needs updating"
+                $this->session()->getFlashBag()->get('error');
+
+                $output = $this->schemaManager()->update();
+                $changes = $output->getResponseStrings();
+
+                $this->flashes()->success(Trans::__('general.phrase.databaase-up-to-date'));
+            } elseif ($button->getName() === 'upgrade') {
+                $logger = new BufferingLogger();
+
+                /** @var SchemaProcessor $transformer */
+                $transformer = $this->app['data_type.transformer.schema'];
+                $transformer->setLogger($logger);
+                $transformer->transform();
+                /** @var TableRecordsProcessor $transformer */
+                $transformer = $this->app['data_type.transformer.table_records'];
+                $transformer->setLogger($logger);
+                $transformer ->transform();
+
+                $typeUpgrades = $logger->cleanLogs();
+            } elseif ($button->getName() === 'show_changes') {
+                return $this->redirectToRoute('dbcheck', ['debug' => true]);
+            } elseif ($button->getName() === 'hide_changes') {
+                return $this->redirectToRoute('dbcheck');
+            }
+        }
+
+        /** @var $schema \Bolt\Storage\Database\Schema\Manager */
+        $schema = $this->app['schema'];
+        $check = $schema->check();
+        /** @var \Bolt\Storage\Database\Schema\Comparison\BaseComparator $comparator */
+        $comparator = $this->app['schema.comparator'];
 
         $context = [
-            'changes' => null,
-            'check'   => $check,
-            'debug'   => $request->query->has('debug'),
-            'alters'  => $this->app['schema.comparator']->getAlters(),
-            'creates' => $this->app['schema.comparator']->getCreates(),
-            'diffs'   => $this->app['schema.comparator']->getDiffs(),
+            'changes'  => $changes,
+            'upgrades' => $typeUpgrades,
+            'check'    => $output ? null : $check,
+            'debug'    => $request->query->has('debug'),
+            'alters'   => $comparator->getAlters(),
+            'creates'  => $comparator->getCreates(),
+            'diffs'    => $comparator->getDiffs(),
+            'form'     => $form->createView()
         ];
 
         return $this->render('@bolt/dbcheck/dbcheck.twig', $context);
@@ -56,11 +109,11 @@ class Database extends BackendBase
     /**
      * Check the database, create tables, add missing/new columns to tables.
      *
-     * @param Request $request The Symfony Request
+     * @deprecated Don't use.
      *
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
-    public function update(Request $request)
+    public function update()
     {
         $output = $this->schemaManager()->update();
         $this->session()->set('dbupdate_result', $output->getResponseStrings());
@@ -71,7 +124,9 @@ class Database extends BackendBase
     /**
      * Show the result of database updates.
      *
-     * @return \Bolt\Response\TemplateResponse
+     * @deprecated Don't use.
+     *
+     * @return TemplateResponse
      */
     public function updateResult()
     {
