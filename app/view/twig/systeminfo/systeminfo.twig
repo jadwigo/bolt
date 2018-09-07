@@ -1,0 +1,51 @@
+{# Page: Footer > About #}
+
+{% extends '@bolt/_base/_page-nav.twig' %}
+
+{% block page_title __('general.phrase.system-config-info') %}
+
+{% block page_subtitle %}
+    Bolt {{ constant('Bolt\\Version::VERSION') }}
+{% endblock page_subtitle %}
+
+{% block info_section %}
+    <div class="col-md-6">
+        {%- for sectionname,section in items -%}
+            <div class="panel-group">
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                        <h4>{{ sectionname }}</h4>
+                    </div>
+                    <ul class="list-group">
+                    {%- for key,line in section -%}
+                        <li class="list-group-item">
+                            <i class="fa fa-check"></i> {{ key }}: {{ line }}
+                        </li>
+                    {%- endfor -%}
+                    </ul>
+                </div>
+            </div>
+        {%- endfor -%}
+    </div>
+{% endblock info_section %}
+
+{% block page_main %}
+
+    <div class="row">
+        <div class="col-md-8">
+
+            <h3>System information</h3>
+
+            <div class="row">
+                {% with {'items': context.items} %}{{ block('info_section') }}{% endwith %}
+            </div>
+
+        </div>
+
+        <aside class="col-md-4">
+            {% use '@bolt/systeminfo/_aside.twig' %}
+            {{ block('info_aside') }}
+        </aside>
+    </div>
+
+{% endblock page_main %}

@@ -46,6 +46,15 @@ final class AdminMenu
                 ->setPermission('settings')
         );
 
+        // Set-up info
+        $configEntry->add(
+            MenuEntry::create('system_info')
+                ->setRoute('systeminfo')
+                ->setLabel('System information')
+                ->setIcon('fa:group')
+                ->setPermission('systemlog')
+        );
+
         // Users & Permissions
         $configEntry->add(
             MenuEntry::create('users')

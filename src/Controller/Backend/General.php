@@ -32,6 +32,9 @@ class General extends BackendBase
         $c->get('/about', 'about')
             ->bind('about');
 
+        $c->get('/systeminfo', 'systeminfo')
+            ->bind('systeminfo');
+
         $c->get('/checks', 'checks')
             ->bind('checks');
 
@@ -63,6 +66,48 @@ class General extends BackendBase
     {
         return $this->render('@bolt/about/about.twig');
     }
+
+
+    /**
+     * Configuration info route.
+     *
+     * @param Request $request
+     *
+     * @return \Bolt\Response\TemplateResponse
+     */
+    public function systeminfo()
+    {
+        $items = [
+            'system' => [
+                'software' => 'test',
+                'version' => '0.1'
+            ],
+            'server' => [
+                'software' => 'apache|nginx|other',
+                'version' => '0.2'
+            ],
+            'mailserver' => [
+                'software' => 'sendmail|postfix|other',
+                'version' => '0.3'
+            ],
+            'php' => [
+                'version' => '5.6|7.0|7.1|7.2|other'
+            ],
+            'db' => [
+                'software' => 'mysql|mariadb|postgresql|sqlite|other',
+                'version' => '0.4'
+            ],
+            'bolt' => [
+                'version' => '0.5'
+            ],
+            'extensions' => [
+                'TODO' => 'This should be run sometime'
+            ]
+        ];
+
+        return $this->render('@bolt/systeminfo/systeminfo.twig', ['items' => $items]);
+    }
+
 
     /**
      * Configuration checks/tests route.
